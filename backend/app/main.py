@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
+from app.errors import register_exception_handlers
 
 settings = get_settings()
 
@@ -11,6 +12,9 @@ app = FastAPI(
     title="PTO Management System API",
     version="0.1.0",
 )
+
+# Every error response uses the standard {"error": {...}} format.
+register_exception_handlers(app)
 
 # Only our frontend may call this API from a browser.
 app.add_middleware(
