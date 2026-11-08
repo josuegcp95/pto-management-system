@@ -39,7 +39,7 @@ pto-management-system/
 
 - Git
 - Python 3.12
-- PostgreSQL 15+ (running locally or via Docker)
+- PostgreSQL 15+ (running locally)
 - Node.js 24 LTS (via [nvm](https://github.com/nvm-sh/nvm); run `nvm use` in the repo root)
 - VS Code (recommended)
 
@@ -54,10 +54,19 @@ cd pto-management-system
 
 ### 2. Local PostgreSQL Database
 
-- Ensure PostgreSQL is running locally and create the `pto_db` database with psql:
+- Ensure PostgreSQL is running locally 
+- Create the `pto_db` database with the following commands depending on your platform:
 
+- Windows:
 ```bash
 psql -U postgres -c "CREATE DATABASE pto_db;"
+```
+
+- MacOS:
+```bash
+brew install postgresql@18
+brew services start postgresql@18
+createdb pto_db
 ```
 
 ### 3. Backend
@@ -96,7 +105,7 @@ Open http://localhost:5173. The page should show **✅ Connected** when the back
 
 | Variable | File | Purpose | Local value |
 |---|---|---|---|
-| `DATABASE_URL` | `backend/.env` | PostgreSQL connection string | `postgresql+psycopg://postgres:postgres@localhost:5432/pto_db` |
+| `DATABASE_URL` | `backend/.env` | PostgreSQL connection string | Windows: `postgresql+psycopg://postgres:postgres@localhost:5432/pto_db` MacOS: `postgresql+psycopg://YOUR_MAC_USERNAME@localhost:5432/pto_db` |
 | `JWT_SECRET` | `backend/.env` | Signs login tokens | Any dev string, e.g. `dev-only-local-secret` |
 | `OPENAI_API_KEY` | `backend/.env` | OpenAI access | Empty unless working on AI features |
 | `FRONTEND_ORIGIN` | `backend/.env` | Allowed origin for CORS | `http://localhost:5173` |
