@@ -107,6 +107,14 @@ def test_overlap_with_approved_request_is_rejected():
 
     assert codes(result.errors) == [OVERLAPPING_REQUEST]
 
+def test_overlap_check_ignores_status_case():
+    # A status stored as "Pending" must still block overlapping requests.
+    existing = [ExistingRequest(date(2026, 12, 7), date(2026, 12, 8), "Pending")]
+
+    result = evaluate_request(date(2026, 12, 8), date(2026, 12, 9), 120, existing, today=TODAY)
+
+    assert codes(result.errors) == [OVERLAPPING_REQUEST]
+
 
 def test_overlap_with_denied_request_is_allowed():
     existing = [ExistingRequest(date(2026, 12, 7), date(2026, 12, 11), "denied")]

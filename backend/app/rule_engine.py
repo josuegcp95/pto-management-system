@@ -188,7 +188,7 @@ def evaluate_request(
         return result
 
     if any(
-        request.status in ACTIVE_STATUSES and _overlaps(start_date, end_date, request)
+        request.status.lower() in ACTIVE_STATUSES and _overlaps(start_date, end_date, request)
         for request in existing_requests
     ):
         result.errors.append(_rule(OVERLAPPING_REQUEST))
