@@ -120,7 +120,7 @@ Open http://localhost:5173. The page should show **✅ Connected** when the back
 2. Commit using the same prefixes, e.g. `feat: add PTO request form`
 3. Open a pull request and fill in the template
 4. CI runs backend tests and frontend lint/build automatically
-5. Get **one teammate approval** and **all checks green** before merging
+5. Get **one teammate approval**, **all checks green**, and **all review comments resolved** before merging
 6. **Squash and merge.** Render deploys automatically after CI passes on `main`
 
-> **Team policy:** never merge with failing checks. GitHub doesn't enforce this on private repos without GitHub Pro, so it's a team agreement.
+> **Branch protection:** `main` requires a pull request, one approval, passing CI checks, and resolved conversations before merging. Only squash merging is allowed.
