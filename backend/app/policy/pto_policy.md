@@ -7,6 +7,7 @@
 | Topic | Rule |
 |---|---|
 | Annual allowance | 120 hours (15 days), granted January 1 |
+| New hires | 10 hours for each full month remaining in the year |
 | Workday | 8 hours, Monday through Friday |
 | Minimum request | 1 full day (no partial days) |
 | Advance notice | At least 7 calendar days |
@@ -22,7 +23,9 @@ All employees of Global Campus Solutions receive PTO under this policy. PTO can 
 
 - Each employee receives **120 hours (15 workdays)** of PTO per calendar year.
 - The full allowance is granted on **January 1**. PTO is not earned per pay period.
+- **New hires** receive a prorated allowance of **10 hours for each full calendar month** remaining in the year after their start date. For example, an employee who starts on May 15 receives 70 hours (June through December).
 - Your balance cannot go below zero. You cannot request more hours than you have available.
+- Your available balance is checked when you submit a request and again when your manager reviews it, no matter when the time off takes place. Hours are deducted from your balance at the moment the request is approved. For example, a request submitted in December for dates in January uses whatever balance you have when your manager approves it.
 
 ## Section 3: How PTO Is Calculated
 
@@ -87,7 +90,8 @@ Company holidays are paid days off and do not use PTO.
 
 - Up to **40 unused hours** carry over into the next calendar year.
 - Any unused hours above 40 **expire** on December 31.
-- PTO is not paid out in place of time off.
+- PTO cannot be exchanged for pay while you are employed.
+- When employment ends, payout of unused PTO follows applicable state law. Contact Human Resources for details.
 
 ## Section 9: Leave Not Covered by This Policy
 
