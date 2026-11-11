@@ -5,6 +5,7 @@ from sqlalchemy import engine_from_config, pool
 
 from app.config import get_settings
 from app.database import Base, normalize_database_url
+import app.models  # noqa: F401 — registers User, PTOBalance, PTORequest on Base.metadata
 
 # Alembic Config object
 config = context.config
