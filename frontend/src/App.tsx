@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ManagerDashboard from "./ManagerDashboard";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -25,6 +26,7 @@ function App() {
       <h1>PTO Management System</h1>
       <p>API: {API_URL}</p>
       <p>Backend status: {label}</p>
+      <ManagerDashboard />
     </main>
   );
 }
