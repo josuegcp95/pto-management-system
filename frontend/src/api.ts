@@ -19,6 +19,8 @@ import type {
   PTOReview,
   PTOReviewResult,
   AIChatResponse,
+  LoginRequest,
+  LoginResponse,
 } from "./types";
 
 const BASE_PATH = "/api/v1";
@@ -105,6 +107,19 @@ export function sendAIMessage(
     {
       method: "POST",
       body: JSON.stringify({ message }),
+    }
+  );
+}
+
+
+export function login(
+  credentials: LoginRequest
+): Promise<LoginResponse> {
+  return apiRequest<LoginResponse>(
+    `${BASE_PATH}/auth/login`,
+    {
+      method: "POST",
+      body: JSON.stringify(credentials),
     }
   );
 }
