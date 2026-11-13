@@ -42,6 +42,37 @@ export async function mockGetCurrentUser(): Promise<User> {
   return mockUser;
 }
 
+export async function mockLogin(
+  email: string,
+  password: string
+): Promise<{
+  access_token: string;
+  token_type: string;
+  user: User;
+}> {
+  if (!email.trim() || !password.trim()) {
+    throw new Error("Email and password are required.");
+  }
+
+  const role = email.toLowerCase().startsWith("manager@")
+    ? "manager"
+    : "employee";
+
+  const user: User = {
+    employee_id: role === "manager" ? 310 : 215,
+    name: role === "manager" ? "Demo Manager" : "Alex Morgan",
+    email,
+    role,
+    manager_id: role === "manager" ? null : 310,
+  };
+
+  return {
+    access_token: "mock-demo-token",
+    token_type: "bearer",
+    user,
+  };
+}
+
 export async function mockGetPTOBalance(): Promise<PTOBalance> {
   return {
     employee_id: 215,
