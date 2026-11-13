@@ -11,11 +11,15 @@ import type {
 } from "./types";
 
 // Demonstration data only. Nothing is saved to the backend.
+
 const mockUser: User = {
   employee_id: 215,
   name: "Alex Morgan",
+  email: "employee@example.com",
   role: "employee",
+  manager_id: 310,
 };
+
 
 let requests: PTORequest[] = [
   {
