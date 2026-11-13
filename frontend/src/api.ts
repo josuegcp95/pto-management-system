@@ -1,4 +1,13 @@
 import { apiRequest } from "./apiClient";
+import {
+  mockGetCurrentUser,
+  mockGetPTOBalance,
+  mockCreatePTORequest,
+  mockGetPTORequests,
+  mockGetPTORequest,
+  mockReviewPTORequest,
+  mockSendAIMessage,
+} from "./mockApi";
 
 import type {
   User,
@@ -13,38 +22,43 @@ import type {
 } from "./types";
 
 const BASE_PATH = "/api/v1";
+const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === "true";
 
-// Get the currently logged-in employee or manager.
 export function getCurrentUser(): Promise<User> {
+  if (USE_MOCK_API) return mockGetCurrentUser();
+
   return apiRequest<User>(`${BASE_PATH}/users/me`);
 }
 
-// Get an employee's PTO balance.
 export function getPTOBalance(): Promise<PTOBalance> {
+  if (USE_MOCK_API) return mockGetPTOBalance();
+
   return apiRequest<PTOBalance>(`${BASE_PATH}/pto/balance`);
 }
 
-// Submit a new PTO request.
 export function createPTORequest(
   request: CreatePTORequest
 ): Promise<PTORequest> {
+  if (USE_MOCK_API) return mockCreatePTORequest(request);
+
   return apiRequest<PTORequest>(`${BASE_PATH}/pto/requests`, {
     method: "POST",
     body: JSON.stringify(request),
   });
 }
 
-// Retrieve PTO requests with optional filters.
 export function getPTORequests(
   status?: PTOStatus,
   limit = 20,
   offset = 0
 ): Promise<PTORequestList> {
+  if (USE_MOCK_API) {
+    return mockGetPTORequests(status, limit, offset);
+  }
+
   const params = new URLSearchParams();
 
-  if (status) {
-    params.set("status", status);
-  }
+  if (status) params.set("status", status);
 
   params.set("limit", String(limit));
   params.set("offset", String(offset));
@@ -54,20 +68,24 @@ export function getPTORequests(
   );
 }
 
-// Retrieve a specific PTO request.
 export function getPTORequest(
   requestId: number
 ): Promise<PTORequest> {
+  if (USE_MOCK_API) return mockGetPTORequest(requestId);
+
   return apiRequest<PTORequest>(
     `${BASE_PATH}/pto/requests/${requestId}`
   );
 }
 
-// Approve or deny a PTO request.
 export function reviewPTORequest(
   requestId: number,
   decision: PTOReview
 ): Promise<PTOReviewResult> {
+  if (USE_MOCK_API) {
+    return mockReviewPTORequest(requestId, decision);
+  }
+
   return apiRequest<PTOReviewResult>(
     `${BASE_PATH}/pto/requests/${requestId}/decision`,
     {
@@ -77,10 +95,11 @@ export function reviewPTORequest(
   );
 }
 
-// Send a question to the AI policy assistant.
 export function sendAIMessage(
   message: string
 ): Promise<AIChatResponse> {
+  if (USE_MOCK_API) return mockSendAIMessage(message);
+
   return apiRequest<AIChatResponse>(
     `${BASE_PATH}/ai/chat`,
     {
@@ -89,3 +108,4 @@ export function sendAIMessage(
     }
   );
 }
+
