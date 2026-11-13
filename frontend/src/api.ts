@@ -112,9 +112,14 @@ export function sendAIMessage(
 }
 
 
+
 export function login(
   credentials: LoginRequest
 ): Promise<LoginResponse> {
+  if (USE_MOCK_API) {
+    return mockLogin(credentials.email, credentials.password);
+  }
+
   return apiRequest<LoginResponse>(
     `${BASE_PATH}/auth/login`,
     {
@@ -123,4 +128,5 @@ export function login(
     }
   );
 }
+
 
