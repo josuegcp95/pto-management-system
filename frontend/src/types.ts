@@ -2,11 +2,26 @@ export type UserRole = "employee" | "manager";
 
 export type PTOStatus = "pending" | "approved" | "denied";
 
+
 export interface User {
   employee_id: number;
   name: string;
+  email: string;
   role: UserRole;
+  manager_id: number | null;
 }
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
+}
+
 
 export interface PTOBalance {
   employee_id: number;
