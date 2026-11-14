@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.auth import router as auth_router
 from app.config import get_settings
 from app.errors import register_exception_handlers
+from app.pto import router as pto_router
 
 settings = get_settings()
 
@@ -26,7 +27,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
-
+app.include_router(pto_router)
 
 @app.get("/health", tags=["system"])
 def health_check() -> dict[str, str]:
