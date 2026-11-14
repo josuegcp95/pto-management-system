@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth import router as auth_router
+from app.auth import router as auth_router
+from app.chatbot import router as chatbot_router
 from app.config import get_settings
 from app.errors import register_exception_handlers
 
@@ -26,6 +28,8 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(auth_router)
+app.include_router(chatbot_router)
 
 
 @app.get("/health", tags=["system"])
