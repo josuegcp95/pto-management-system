@@ -22,17 +22,21 @@ export interface CreatePTORequest {
   reason?: string;
 }
 
+
 export interface PTORequest {
   request_id: number;
   employee_id: number;
+  employee_name: string;
   start_date: string;
   end_date: string;
+  hours: number;
   reason?: string | null;
   status: PTOStatus;
+  flags: { code: string; message: string }[];
+  manager_comment?: string | null;
   created_at?: string;
-  rule_flags?: string[];
-  rule_explanations?: string[];
 }
+
 
 export interface PTORequestList {
   requests: PTORequest[];
