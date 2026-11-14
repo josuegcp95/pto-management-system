@@ -18,24 +18,34 @@ const mockUser: User = {
 };
 
 let requests: PTORequest[] = [
-  {
-    request_id: 1042,
-    employee_id: 215,
-    start_date: "2026-11-18",
-    end_date: "2026-11-20",
-    reason: "Vacation",
-    status: "pending",
-    created_at: "2026-11-10T14:00:00Z",
-  },
-  {
-    request_id: 1043,
-    employee_id: 215,
-    start_date: "2026-11-25",
-    end_date: "2026-11-27",
-    reason: "Family event",
-    status: "approved",
-    created_at: "2026-11-09T10:00:00Z",
-  },
+
+{
+  request_id: 1042,
+  employee_id: 215,
+  employee_name: "Alex Morgan",
+  start_date: "2026-11-18",
+  end_date: "2026-11-20",
+  hours: 24,
+  reason: "Vacation",
+  status: "pending",
+  flags: [],
+  created_at: "2026-11-10T14:00:00Z",
+},
+
+
+{
+  request_id: 1043,
+  employee_id: 215,
+  employee_name: "Alex Morgan",
+  start_date: "2026-11-25",
+  end_date: "2026-11-27",
+  hours: 24,
+  reason: "Family event",
+  status: "approved",
+  flags: [],
+  created_at: "2026-11-09T10:00:00Z",
+},
+
 ];
 
 export async function mockGetCurrentUser(): Promise<User> {
@@ -63,13 +73,18 @@ export async function mockCreatePTORequest(
     throw new Error("Reason cannot exceed 500 characters.");
   }
 
-  const newRequest: PTORequest = {
-    request_id: Math.max(0, ...requests.map(r => r.request_id)) + 1,
-    employee_id: mockUser.employee_id,
-    ...request,
-    status: "pending",
-    created_at: new Date().toISOString(),
-  };
+
+const newRequest: PTORequest = {
+  request_id: Math.max(0, ...requests.map(r => r.request_id)) + 1,
+  employee_id: mockUser.employee_id,
+  ...request,
+  employee_name: mockUser.name,
+  hours: 0,
+  status: "pending",
+  flags: [],
+  created_at: new Date().toISOString(),
+};
+
 
   requests = [...requests, newRequest];
   return newRequest;
