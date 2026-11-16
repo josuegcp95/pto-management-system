@@ -1,5 +1,6 @@
 """Tests for the demo data seed script (scripts/seed.py)."""
 
+import bcrypt
 import pytest
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session, sessionmaker
@@ -9,6 +10,18 @@ from app.database import Base
 from app.models import PTOBalance, PTORequest, User
 from app.rule_engine import calculate_hours
 from scripts.seed import DEMO_PASSWORDS, STARTING_TOTAL_HOURS, seed_demo_data
+
+_ORIG_GENSALT = bcrypt.gensalt
+
+
+@pytest.fixture(autouse=True)
+def fast_bcrypt(monkeypatch):
+    """Use minimum 4-round bcrypt salts so seed tests run in milliseconds."""
+    monkeypatch.setattr(
+        bcrypt,
+        "gensalt",
+        lambda rounds=4, prefix=b"2b": _ORIG_GENSALT(rounds=4, prefix=prefix),
+    )
 
 
 @pytest.fixture()
@@ -39,7 +52,6 @@ def test_seed_creates_manager_and_three_assigned_employees_with_unique_passwords
     for emp in employees:
         assert emp.manager_id == manager.employee_id
         assert verify_password(DEMO_PASSWORDS[emp.email], emp.password_hash) is True
-        # Confirm manager's password does not work for the employee
         assert verify_password(DEMO_PASSWORDS[manager.email], emp.password_hash) is False
 
 
