@@ -23,6 +23,8 @@ EXPECTED_REQUEST_KEYS = {
     "status",
     "flags",
     "manager_comment",
+    "reviewed_by",
+    "reviewed_at",
     "created_at",
 }
 
@@ -351,6 +353,8 @@ def test_manager_approves_request_moves_pending_to_used(
     assert body["request_id"] == req.request_id
     assert body["status"] == "approved"
     assert body["manager_comment"] == "Request approved."
+    assert body["reviewed_by"] == alice.employee_id
+    assert body["reviewed_at"] is not None
 
     db_session.expire_all()
     updated_req = db_session.get(PTORequest, req.request_id)
@@ -380,6 +384,8 @@ def test_manager_denies_request_returns_pending_hours_to_available(
     assert set(body.keys()) == EXPECTED_REQUEST_KEYS
     assert body["status"] == "denied"
     assert body["manager_comment"] == "Peak week, coverage needed."
+    assert body["reviewed_by"] == alice.employee_id
+    assert body["reviewed_at"] is not None
 
     db_session.expire_all()
     updated_req = db_session.get(PTORequest, req.request_id)

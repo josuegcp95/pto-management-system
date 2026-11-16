@@ -53,6 +53,8 @@ class PTORequestResponse(BaseModel):
     status: str
     flags: list[PTOFlag]
     manager_comment: str | None
+    reviewed_by: int | None = None
+    reviewed_at: datetime | None = None
     created_at: datetime
 
     @classmethod
@@ -68,9 +70,10 @@ class PTORequestResponse(BaseModel):
             status=request.status,
             flags=request.rule_flags or [],
             manager_comment=request.manager_comment,
+            reviewed_by=request.reviewed_by,
+            reviewed_at=request.reviewed_at,
             created_at=request.created_at,
         )
-
 
 class PTOBalanceResponse(BaseModel):
     """Employee PTO balance (Week 3 spec, Section 3.2)."""
