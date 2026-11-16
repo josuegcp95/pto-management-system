@@ -48,7 +48,7 @@ function LoginPage({ onLogin }: LoginPageProps) {
         borderRadius: "10px",
       }}
     >
-      <h1>CareBalance AI</h1>
+      <h1>PTO Management System</h1>
       <h2>Sign In</h2>
       <p>Log in to manage your PTO requests.</p>
 
