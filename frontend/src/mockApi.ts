@@ -200,6 +200,7 @@ export async function mockReviewPTORequest(
   }
 
   request.status = decision.decision;
+  request.manager_comment = decision.manager_comment?.trim() || null;
 
   return {
     request_id: requestId,
