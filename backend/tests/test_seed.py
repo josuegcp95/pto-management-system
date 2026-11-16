@@ -8,7 +8,7 @@ from app.auth import verify_password
 from app.database import Base
 from app.models import PTOBalance, PTORequest, User
 from app.rule_engine import calculate_hours
-from scripts.seed import DEMO_PASSWORD, STARTING_TOTAL_HOURS, seed_demo_data
+from scripts.seed import DEMO_PASSWORDS, STARTING_TOTAL_HOURS, seed_demo_data
 
 
 @pytest.fixture()
@@ -20,8 +20,13 @@ def db_session():
         yield session
 
 
-def test_seed_creates_manager_and_three_assigned_employees(db_session: Session):
+def test_seed_creates_manager_and_three_assigned_employees_with_unique_passwords(
+    db_session: Session,
+):
     seed_demo_data(db_session)
+
+    # Confirm all configured demo passwords are distinct
+    assert len(set(DEMO_PASSWORDS.values())) == len(DEMO_PASSWORDS)
 
     managers = db_session.scalars(select(User).where(User.role == "manager")).all()
     employees = db_session.scalars(select(User).where(User.role == "employee")).all()
@@ -29,10 +34,13 @@ def test_seed_creates_manager_and_three_assigned_employees(db_session: Session):
     assert len(managers) == 1
     assert len(employees) == 3
     manager = managers[0]
+    assert verify_password(DEMO_PASSWORDS[manager.email], manager.password_hash) is True
+
     for emp in employees:
         assert emp.manager_id == manager.employee_id
-        assert verify_password(DEMO_PASSWORD, emp.password_hash) is True
-    assert verify_password(DEMO_PASSWORD, manager.password_hash) is True
+        assert verify_password(DEMO_PASSWORDS[emp.email], emp.password_hash) is True
+        # Confirm manager's password does not work for the employee
+        assert verify_password(DEMO_PASSWORDS[manager.email], emp.password_hash) is False
 
 
 def test_seed_creates_all_statuses_and_flagged_requests(db_session: Session):
@@ -79,7 +87,6 @@ def test_seed_is_idempotent_when_run_multiple_times(db_session: Session):
         for b in db_session.scalars(select(PTOBalance)).all()
     }
 
-    # Run a second time on the same database
     seed_demo_data(db_session)
     second_user_count = db_session.scalar(select(func.count()).select_from(User))
     second_req_count = db_session.scalar(select(func.count()).select_from(PTORequest))
