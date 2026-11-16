@@ -47,8 +47,6 @@ let requests: PTORequest[] = [
   },
 ];
 
-];
-
 export async function mockGetCurrentUser(): Promise<User> {
   return mockUser;
 }
