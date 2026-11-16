@@ -7,6 +7,7 @@ import {
   mockGetPTORequest,
   mockReviewPTORequest,
   mockSendAIMessage,
+  mockLogin,
 } from "./mockApi";
 
 import type {
@@ -19,6 +20,8 @@ import type {
   PTOReview,
   PTOReviewResult,
   AIChatResponse,
+  LoginRequest,
+  LoginResponse,
 } from "./types";
 
 const BASE_PATH = "/api/v1";
@@ -108,4 +111,23 @@ export function sendAIMessage(
     }
   );
 }
+
+
+
+export function login(
+  credentials: LoginRequest
+): Promise<LoginResponse> {
+  if (USE_MOCK_API) {
+    return mockLogin(credentials.email, credentials.password);
+  }
+
+  return apiRequest<LoginResponse>(
+    `${BASE_PATH}/auth/login`,
+    {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    }
+  );
+}
+
 
