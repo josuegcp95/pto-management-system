@@ -1,55 +1,79 @@
 
-import { useState } from "react";
-
-type PTORequest = {
-  id: number;
-  employee: string;
-  startDate: string;
-  endDate: string;
-  status: "Pending" | "Approved" | "Denied";
-  flag: string | null;
-  comment?: string;
-};
-
-const sampleRequests: PTORequest[] = [
-  {
-    id: 1,
-    employee: "Alex Morgan",
-    startDate: "2026-11-18",
-    endDate: "2026-11-20",
-    status: "Pending",
-    flag: null,
-  },
-  {
-    id: 2,
-    employee: "Jordan Lee",
-    startDate: "2026-11-23",
-    endDate: "2026-11-27",
-    status: "Pending",
-    flag: "Potential staffing conflict during holiday week",
-  },
-  {
-    id: 3,
-    employee: "Taylor Smith",
-    startDate: "2026-12-03",
-    endDate: "2026-12-04",
-    status: "Pending",
-    flag: null,
-  },
-];
+import { useEffect, useState } from "react";
+import { getPTORequests, reviewPTORequest } from "./api";
+import type { PTORequest, PTOReview } from "./types";
 
 function ManagerDashboard() {
-  const [requests, setRequests] = useState(sampleRequests);
+  const [requests, setRequests] = useState<PTORequest[]>([]);
   const [comments, setComments] = useState<Record<number, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [reviewingId, setReviewingId] = useState<number | null>(null);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  function handleDecision(id: number, status: "Approved" | "Denied") {
-    setRequests((previous) =>
-      previous.map((request) =>
-        request.id === id
-          ? { ...request, status, comment: comments[id] ?? "" }
-          : request
-      )
-    );
+  useEffect(() => {
+    async function loadRequests() {
+      try {
+        const result = await getPTORequests("pending");
+        setRequests(result.requests.filter(
+          (request) => request.status === "pending"
+        ));
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load pending requests."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    void loadRequests();
+  }, []);
+
+  async function handleDecision(
+    requestId: number,
+    decision: PTOReview["decision"]
+  ) {
+    setError("");
+    setSuccess("");
+    setReviewingId(requestId);
+
+    try {
+      const managerComment = comments[requestId]?.trim();
+
+      await reviewPTORequest(requestId, {
+        decision,
+        ...(managerComment
+          ? { manager_comment: managerComment }
+          : {}),
+      });
+
+      setRequests((previous) =>
+        previous.filter(
+          (request) => request.request_id !== requestId
+        )
+      );
+
+      setSuccess(
+        `PTO request #${requestId} ${decision} successfully.`
+      );
+
+      setComments((previous) => {
+        const updated = { ...previous };
+        delete updated[requestId];
+        return updated;
+      });
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to review PTO request."
+      );
+    } finally {
+      setReviewingId(null);
+    }
   }
 
   return (
@@ -57,65 +81,104 @@ function ManagerDashboard() {
       <h2>Manager Dashboard</h2>
       <p>Review and manage employee PTO requests.</p>
 
-      <h3>Pending Requests</h3>
-
-      {requests.filter((request) => request.status === "Pending").length === 0 && (
-        <p>No pending requests.</p>
+      {error && (
+        <p role="alert" style={{ color: "red" }}>
+          {error}
+        </p>
       )}
 
-      {requests.map((request) => (
-        <article
-          key={request.id}
-          style={{
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-            padding: "16px",
-            marginBottom: "16px",
-          }}
-        >
-          <h4>{request.employee}</h4>
-          <p>
-            Requested dates: {request.startDate} to {request.endDate}
-          </p>
-          <p>Status: {request.status}</p>
+      {success && (
+        <p role="status" style={{ color: "green" }}>
+          {success}
+        </p>
+      )}
 
-          {request.flag && (
-            <p style={{ color: "#d97706" }}>
-              ⚠️ {request.flag}
+      <h3>Pending Requests</h3>
+
+      {loading ? (
+        <p>Loading pending requests...</p>
+      ) : requests.length === 0 ? (
+        <p>No pending requests.</p>
+      ) : (
+        requests.map((request) => (
+          <article
+            key={request.request_id}
+            style={{
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              padding: "16px",
+              marginBottom: "16px",
+            }}
+          >
+            <h4>{request.employee_name}</h4>
+
+            <p>
+              Requested dates: {request.start_date} to{" "}
+              {request.end_date}
             </p>
-          )}
 
-          {request.status === "Pending" && (
-            <>
-              <textarea
-                placeholder="Optional manager comment"
-                value={comments[request.id] ?? ""}
-                onChange={(event) =>
-                  setComments((previous) => ({
-                    ...previous,
-                    [request.id]: event.target.value,
-                  }))
+            <p>Requested hours: {request.hours}</p>
+            <p>Status: {request.status}</p>
+
+            {request.reason && (
+              <p>Reason: {request.reason}</p>
+            )}
+
+            {request.flags.map((flag) => (
+              <p
+                key={flag.code}
+                style={{ color: "#d97706" }}
+              >
+                ⚠️ {flag.code}: {flag.message}
+              </p>
+            ))}
+
+            <textarea
+              aria-label="Manager comment"
+              placeholder="Optional manager comment"
+              value={comments[request.request_id] ?? ""}
+              disabled={reviewingId !== null}
+              onChange={(event) =>
+                setComments((previous) => ({
+                  ...previous,
+                  [request.request_id]: event.target.value,
+                }))
+              }
+            />
+
+            <div style={{ marginTop: "10px" }}>
+              <button
+                disabled={reviewingId !== null}
+                onClick={() =>
+                  void handleDecision(
+                    request.request_id,
+                    "approved"
+                  )
                 }
-              />
+              >
+                {reviewingId === request.request_id
+                  ? "Processing..."
+                  : "Approve"}
+              </button>
 
-              <div style={{ marginTop: "10px" }}>
-                <button
-                  onClick={() => handleDecision(request.id, "Approved")}
-                >
-                  Approve
-                </button>
-
-                <button
-                  onClick={() => handleDecision(request.id, "Denied")}
-                  style={{ marginLeft: "10px" }}
-                >
-                  Deny
-                </button>
-              </div>
-            </>
-          )}
-        </article>
-      ))}
+              <button
+                disabled={reviewingId !== null}
+                onClick={() =>
+                  void handleDecision(
+                    request.request_id,
+                    "denied"
+                  )
+                }
+                style={{ marginLeft: "10px" }}
+              >
+                {reviewingId === request.request_id
+                  ? "Processing..."
+                  : "Deny"}
+              </button>
+            </div>
+          </article>
+        ))
+      )}
     </section>
   );
 }
