@@ -108,6 +108,8 @@ Open http://localhost:5173. The page should show **✅ Connected** when the back
 | `DATABASE_URL` | `backend/.env` | PostgreSQL connection string | Windows: `postgresql+psycopg://postgres:postgres@localhost:5432/pto_db` MacOS: `postgresql+psycopg://YOUR_MAC_USERNAME@localhost:5432/pto_db` |
 | `JWT_SECRET` | `backend/.env` | Signs login tokens | Any dev string, e.g. `dev-only-local-secret` |
 | `OPENAI_API_KEY` | `backend/.env` | OpenAI access | Empty unless working on AI features |
+| `OPENAI_MODEL` | `backend/.env` | OpenAI model for the chatbot | `gpt-5.4-mini` (default) |
+| `AI_PROVIDER` | `backend/.env` | `openai` or `mock` (fixed demo reply, no API calls) | `mock` if you don't have an OpenAI key |
 | `FRONTEND_ORIGIN` | `backend/.env` | Allowed origin for CORS | `http://localhost:5173` |
 | `VITE_API_URL` | `frontend/.env.local` | Backend URL | `http://localhost:8000` |
 
