@@ -23,7 +23,6 @@ from app.rule_engine import (
     calculate_hours,
 )
 
-DEMO_PASSWORD = "password123"
 STARTING_TOTAL_HOURS = 120
 
 
@@ -31,6 +30,7 @@ STARTING_TOTAL_HOURS = 120
 class DemoUserSpec:
     name: str
     email: str
+    password: str
     role: str
 
 
@@ -49,14 +49,34 @@ class DemoRequestSpec:
 MANAGER_SPEC = DemoUserSpec(
     name="Alice Manager",
     email="manager@example.com",
+    password="manager-pass-123",
     role="manager",
 )
 
 EMPLOYEE_SPECS: list[DemoUserSpec] = [
-    DemoUserSpec(name="Bob Employee", email="bob@example.com", role="employee"),
-    DemoUserSpec(name="Carol Employee", email="carol@example.com", role="employee"),
-    DemoUserSpec(name="David Employee", email="david@example.com", role="employee"),
+    DemoUserSpec(
+        name="Bob Employee",
+        email="bob@example.com",
+        password="bob-pass-123",
+        role="employee",
+    ),
+    DemoUserSpec(
+        name="Carol Employee",
+        email="carol@example.com",
+        password="carol-pass-123",
+        role="employee",
+    ),
+    DemoUserSpec(
+        name="David Employee",
+        email="david@example.com",
+        password="david-pass-123",
+        role="employee",
+    ),
 ]
+
+DEMO_PASSWORDS: dict[str, str] = {
+    spec.email: spec.password for spec in [MANAGER_SPEC, *EMPLOYEE_SPECS]
+}
 
 REQUEST_SPECS: list[DemoRequestSpec] = [
     # Bob: 1 approved (40h) + 1 pending over Thanksgiving week (24h; Thu/Fri are holidays)
@@ -118,9 +138,9 @@ REQUEST_SPECS: list[DemoRequestSpec] = [
 def _upsert_user(
     db: Session,
     spec: DemoUserSpec,
-    password_hash: str,
     manager_id: int | None,
 ) -> User:
+    password_hash = hash_password(spec.password)
     user = db.scalars(select(User).where(User.email == spec.email)).first()
     if user is None:
         user = User(
@@ -211,16 +231,13 @@ def _sync_balance(db: Session, user: User) -> PTOBalance:
 
 def seed_demo_data(db: Session) -> dict[str, User]:
     """Seed demo manager, employees, requests, and synchronized PTO balances."""
-    shared_password_hash = hash_password(DEMO_PASSWORD)
-
-    manager = _upsert_user(db, MANAGER_SPEC, shared_password_hash, manager_id=None)
+    manager = _upsert_user(db, MANAGER_SPEC, manager_id=None)
     users_by_email: dict[str, User] = {manager.email: manager}
 
     for emp_spec in EMPLOYEE_SPECS:
         emp = _upsert_user(
             db,
             emp_spec,
-            shared_password_hash,
             manager_id=manager.employee_id,
         )
         users_by_email[emp.email] = emp
@@ -240,13 +257,15 @@ def main() -> None:
     SessionLocal = get_session_local()
     with SessionLocal() as db:
         users = seed_demo_data(db)
-        print(f"Demo data loaded successfully (password for all accounts: {DEMO_PASSWORD})\n")
+        print("Demo data loaded successfully:\n")
         for email, user in users.items():
             balance = db.get(PTOBalance, user.employee_id)
+            password = DEMO_PASSWORDS[email]
             print(
-                f"- {user.name:<15} | {email:<20} | role={user.role:<8} | "
-                f"total={balance.total_hours}h, used={balance.used_hours}h, "
-                f"pending={balance.pending_hours}h, available={balance.available_hours}h"
+                f"- {user.name:<15} | {email:<20} | password={password:<16} | "
+                f"role={user.role:<8} | total={balance.total_hours}h, "
+                f"used={balance.used_hours}h, pending={balance.pending_hours}h, "
+                f"available={balance.available_hours}h"
             )
 
 
