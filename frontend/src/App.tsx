@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import LoginPage from "./LoginPage";
+import EmployeeDashboard from "./EmployeeDashboard";
 import { setAuthToken } from "./apiClient";
 import type { User } from "./types";
 import "./App.css";
@@ -36,12 +37,11 @@ function App() {
           <h2>Manager Dashboard</h2>
           <p>Manager PTO approval interface will appear here.</p>
         </section>
+
       ) : (
-        <section>
-          <h2>Employee Dashboard</h2>
-          <p>Employee PTO requests and balances will appear here.</p>
-        </section>
+        <EmployeeDashboard />
       )}
+
     </main>
   );
 }
