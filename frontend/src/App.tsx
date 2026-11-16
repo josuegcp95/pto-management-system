@@ -1,32 +1,45 @@
-import { useEffect, useState } from "react";
+
+import { useState } from "react";
+import LoginPage from "./LoginPage";
 import ManagerDashboard from "./ManagerDashboard";
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-type Status = "checking" | "ok" | "error";
+import { setAuthToken } from "./apiClient";
+import type { User } from "./types";
+import "./App.css";
 
 function App() {
-  const [status, setStatus] = useState<Status>("checking");
+  const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    fetch(`${API_URL}/health`)
-      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then((data) => setStatus(data.status === "ok" ? "ok" : "error"))
-      .catch(() => setStatus("error"));
-  }, []);
+  function handleLogin(authenticatedUser: User) {
+    setUser(authenticatedUser);
+  }
 
-  const label = {
-    checking: "Checking…",
-    ok: "✅ Connected",
-    error: "❌ Unreachable",
-  }[status];
+  function handleLogout() {
+    setAuthToken(null);
+    setUser(null);
+  }
+
+  if (!user) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
 
   return (
-    <main style={{ fontFamily: "system-ui", padding: "2rem" }}>
-      <h1>PTO Management System</h1>
-      <p>API: {API_URL}</p>
-      <p>Backend status: {label}</p>
-      <ManagerDashboard />
+    <main>
+      <header>
+        <h1>PTO Management System</h1>
+        <p>Welcome, {user.name}!</p>
+        <button onClick={handleLogout}>Log Out</button>
+      </header>
+
+      <hr />
+
+{user.role === "manager" ? (
+  <ManagerDashboard />
+) : (
+        <section>
+          <h2>Employee Dashboard</h2>
+          <p>Employee PTO requests and balances will appear here.</p>
+        </section>
+      )}
     </main>
   );
 }

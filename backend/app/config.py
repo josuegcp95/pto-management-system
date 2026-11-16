@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     database_url: str = ""
     jwt_secret: str = ""
     openai_api_key: str = ""
+    openai_model: str = "gpt-5.4-mini"
+    ai_provider: str = "openai"  # "openai" or "mock" (no API calls)
     frontend_origin: str = "http://localhost:5173"
 
 
