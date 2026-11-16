@@ -1,13 +1,8 @@
 
 import { useState } from "react";
 import LoginPage from "./LoginPage";
-import { useState } from "react";
-import LoginPage from "./LoginPage";
 import EmployeeDashboard from "./EmployeeDashboard";
 import ManagerDashboard from "./ManagerDashboard";
-import { setAuthToken } from "./apiClient";
-import type { User } from "./types";
-import "./App.css";
 import { setAuthToken } from "./apiClient";
 import type { User } from "./types";
 import "./App.css";
@@ -43,8 +38,6 @@ function App() {
       ) : (
         <EmployeeDashboard />
       )}
-      )}
-
     </main>
   );
 }
