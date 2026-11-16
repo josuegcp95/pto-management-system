@@ -24,7 +24,7 @@ function App() {
   return (
     <main>
       <header>
-        <h1>CareBalance AI</h1>
+        <h1>PTO Management System</h1>
         <p>Welcome, {user.name}!</p>
         <button onClick={handleLogout}>Log Out</button>
       </header>
