@@ -78,6 +78,7 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 cp .env.example .env               # then fill in local values (see below), update DATABASE_URL
 alembic upgrade head
+python -m scripts.seed             # load demo manager, employees, balances, and sample requests
 uvicorn app.main:app --reload
 ```
 
@@ -115,6 +116,20 @@ Open http://localhost:5173. The page should show **✅ Connected** when the back
 
 - **Never commit `.env` or `.env.local` files.** Both are gitignored. Production values live only in Render.
 - **OpenAI keys:** you don't need one unless you're working on the AI feature. The rest of the app runs without it. If you do need one, ask the Integration Lead for your own dev key; keys are never shared between developers.
+
+#### Demo Accounts (loaded by `python -m scripts.seed`)
+
+| Name | Email | Password | Role | Balance (Total / Used / Pending / Avail) |
+|---|---|---|---|---|
+| Alice Manager | `manager@example.com` | `manager-pass-123` | `manager` | 120h / 0h / 0h / 120h |
+| Bob Employee | `bob@example.com` | `bob-pass-123` | `employee` | 120h / 40h / 24h / 56h |
+| Carol Employee | `carol@example.com` | `carol-pass-123` | `employee` | 120h / 16h / 16h / 88h |
+| David Employee | `david@example.com` | `david-pass-123` | `employee` | 120h / 0h / 96h / 24h |
+
+- **Alice Manager** supervises Bob, Carol, and David.
+- **Bob Employee** has 1 approved request (40h) and 1 pending request over Thanksgiving week (24h).
+- **Carol Employee** has 1 approved request (16h), 1 pending request with a `SHORT_NOTICE` flag (16h), and 1 denied request (24h).
+- **David Employee** has 1 pending request with a `LONG_REQUEST` flag (96h).
 
 ## Development Workflow
 

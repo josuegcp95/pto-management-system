@@ -1,6 +1,7 @@
 """Tests for authentication, JWT handling, and role-based access control."""
 
 from datetime import timedelta
+import bcrypt
 import pytest
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
@@ -22,13 +23,26 @@ from app.errors import register_exception_handlers
 from app.models import User
 
 TEST_JWT_SECRET = "test-only-jwt-secret-key"
+_ORIG_GENSALT = bcrypt.gensalt
+
+
+def _fast_gensalt(rounds: int = 4, prefix: bytes = b"2b") -> bytes:
+    return _ORIG_GENSALT(rounds=4, prefix=prefix)
+
+
+# Precompute hashes once using fast 4-round salts so sample_users is instant
+MANAGER_A_HASH = bcrypt.hashpw(b"manager-pass-123", _fast_gensalt()).decode("utf-8")
+MANAGER_B_HASH = bcrypt.hashpw(b"manager-pass-456", _fast_gensalt()).decode("utf-8")
+BOB_HASH = bcrypt.hashpw(b"employee-pass-123", _fast_gensalt()).decode("utf-8")
+DANA_HASH = bcrypt.hashpw(b"employee-pass-456", _fast_gensalt()).decode("utf-8")
 
 
 @pytest.fixture(autouse=True)
-def configure_test_jwt_secret(monkeypatch):
-    """Ensure JWT_SECRET is always set during tests (including in CI)."""
+def configure_test_auth_env(monkeypatch):
+    """Ensure JWT_SECRET is set and bcrypt uses fast 4-round salts in tests."""
     settings = get_settings()
     monkeypatch.setattr(settings, "jwt_secret", TEST_JWT_SECRET)
+    monkeypatch.setattr(bcrypt, "gensalt", _fast_gensalt)
 
 
 @pytest.fixture()
@@ -78,13 +92,13 @@ def sample_users(db_session: Session) -> dict[str, User]:
     manager_a = User(
         name="Alice Manager",
         email="alice@example.com",
-        password_hash=hash_password("manager-pass-123"),
+        password_hash=MANAGER_A_HASH,
         role="manager",
     )
     manager_b = User(
         name="charlie Manager",
         email="charlie@example.com",
-        password_hash=hash_password("manager-pass-456"),
+        password_hash=MANAGER_B_HASH,
         role="manager",
     )
     db_session.add_all([manager_a, manager_b])
@@ -93,14 +107,14 @@ def sample_users(db_session: Session) -> dict[str, User]:
     employee_bob = User(
         name="Bob Employee",
         email="bob@example.com",
-        password_hash=hash_password("employee-pass-123"),
+        password_hash=BOB_HASH,
         role="employee",
         manager_id=manager_a.employee_id,
     )
     employee_dana = User(
         name="Dana Employee",
         email="dana@example.com",
-        password_hash=hash_password("employee-pass-456"),
+        password_hash=DANA_HASH,
         role="employee",
         manager_id=manager_b.employee_id,
     )
@@ -275,7 +289,6 @@ def test_manager_can_access_assigned_employee(
 def test_manager_cannot_access_unassigned_employee_returns_403(
     client: TestClient, sample_users: dict[str, User]
 ):
-    # manager_a tries to access dana, who reports to manager_b
     manager_a = sample_users["manager_a"]
     dana = sample_users["dana"]
     token = create_access_token(manager_a)
