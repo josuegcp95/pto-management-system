@@ -20,6 +20,7 @@ const mockUser: User = {
   manager_id: 310,
 };
 
+
 let requests: PTORequest[] = [
   {
     request_id: 1042,
@@ -45,7 +46,42 @@ let requests: PTORequest[] = [
     flags: [],
     created_at: "2026-11-09T10:00:00Z",
   },
+  {
+    request_id: 1044,
+    employee_id: 216,
+    employee_name: "Jordan Lee",
+    start_date: "2026-11-23",
+    end_date: "2026-11-27",
+    hours: 40,
+    reason: "Thanksgiving holiday",
+    status: "pending",
+    flags: [
+      {
+        code: "SHORT_NOTICE",
+        message: "Submitted with less than 7 days' notice.",
+      },
+    ],
+    created_at: "2026-11-15T09:00:00Z",
+  },
+  {
+    request_id: 1045,
+    employee_id: 217,
+    employee_name: "Taylor Smith",
+    start_date: "2026-12-03",
+    end_date: "2026-12-04",
+    hours: 16,
+    reason: "Personal time",
+    status: "pending",
+    flags: [
+      {
+        code: "INSUFFICIENT_BALANCE",
+        message: "Request exceeds available PTO balance.",
+      },
+    ],
+    created_at: "2026-11-14T11:00:00Z",
+  },
 ];
+
 
 export async function mockGetCurrentUser(): Promise<User> {
   return mockUser;
@@ -164,6 +200,7 @@ export async function mockReviewPTORequest(
   }
 
   request.status = decision.decision;
+  request.manager_comment = decision.manager_comment?.trim() || null;
 
   return {
     request_id: requestId,
