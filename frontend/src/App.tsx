@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import LoginPage from "./LoginPage";
+import EmployeeDashboard from "./EmployeeDashboard";
 import ManagerDashboard from "./ManagerDashboard";
 import { setAuthToken } from "./apiClient";
 import type { User } from "./types";
@@ -32,13 +33,10 @@ function App() {
 
       <hr />
 
-{user.role === "manager" ? (
-  <ManagerDashboard />
-) : (
-        <section>
-          <h2>Employee Dashboard</h2>
-          <p>Employee PTO requests and balances will appear here.</p>
-        </section>
+      {user.role === "manager" ? (
+        <ManagerDashboard />
+      ) : (
+        <EmployeeDashboard />
       )}
     </main>
   );
