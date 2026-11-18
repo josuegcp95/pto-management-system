@@ -17,6 +17,8 @@ from app.auth import (
     router as auth_router,
     verify_password,
 )
+from pydantic import SecretStr
+
 from app.config import get_settings
 from app.database import Base, get_db
 from app.errors import register_exception_handlers
@@ -41,7 +43,7 @@ DANA_HASH = bcrypt.hashpw(b"employee-pass-456", _fast_gensalt()).decode("utf-8")
 def configure_test_auth_env(monkeypatch):
     """Ensure JWT_SECRET is set and bcrypt uses fast 4-round salts in tests."""
     settings = get_settings()
-    monkeypatch.setattr(settings, "jwt_secret", TEST_JWT_SECRET)
+    monkeypatch.setattr(settings, "jwt_secret", SecretStr(TEST_JWT_SECRET))
     monkeypatch.setattr(bcrypt, "gensalt", _fast_gensalt)
 
 

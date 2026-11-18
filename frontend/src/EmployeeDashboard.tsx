@@ -186,11 +186,21 @@ function EmployeeDashboard() {
             </p>
 
             <p>
+              <strong>Hours:</strong> {request.hours}
+            </p>
+
+            <p>
               <strong>Status:</strong> {request.status}
             </p>
 
             {request.reason && (
               <p><strong>Reason:</strong> {request.reason}</p>
+            )}
+
+            {request.manager_comment && (
+              <p>
+                <strong>Manager comment:</strong> {request.manager_comment}
+              </p>
             )}
 
             {request.flags?.map((flag, index) => (

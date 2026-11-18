@@ -136,14 +136,15 @@ def get_chat_provider() -> ChatProvider:
     if settings.ai_provider == "mock":
         return MockProvider()
 
-    if not settings.openai_api_key:
+    api_key = settings.openai_api_key.get_secret_value()
+    if not api_key:
         raise AppError(
             "AI_SERVICE_UNAVAILABLE",
             "The AI assistant is not configured. Please try again later.",
             status_code=503,
         )
 
-    return OpenAIProvider(settings.openai_api_key, settings.openai_model)
+    return OpenAIProvider(api_key, settings.openai_model)
 
 
 # ---------------------------------------------------------------------------

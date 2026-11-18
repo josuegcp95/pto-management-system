@@ -31,11 +31,12 @@ def normalize_database_url(url: str) -> str:
 def get_engine() -> Engine:
     """Create and cache the SQLAlchemy engine using DATABASE_URL from app.config."""
     settings = get_settings()
-    if not settings.database_url:
+    database_url = settings.database_url.get_secret_value()
+    if not database_url:
         raise RuntimeError(
             "DATABASE_URL is not set. Configure it in backend/.env or environment variables."
         )
-    db_url = normalize_database_url(settings.database_url)
+    db_url = normalize_database_url(database_url)
     return create_engine(db_url, pool_pre_ping=True)
 
 

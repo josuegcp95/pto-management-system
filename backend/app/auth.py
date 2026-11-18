@@ -82,11 +82,12 @@ def verify_password(plain_password: str, password_hash: str) -> bool:
 
 def _get_jwt_secret() -> str:
     settings = get_settings()
-    if not settings.jwt_secret:
+    jwt_secret = settings.jwt_secret.get_secret_value()
+    if not jwt_secret:
         raise RuntimeError(
             "JWT_SECRET is not set. Configure it in backend/.env or environment variables."
         )
-    return settings.jwt_secret
+    return jwt_secret
 
 
 def create_access_token(

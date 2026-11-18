@@ -16,14 +16,15 @@ if config.config_file_name is not None:
 
 # Load DATABASE_URL from app/config.py
 settings = get_settings()
-if not settings.database_url:
+database_url = settings.database_url.get_secret_value()
+if not database_url:
     raise RuntimeError(
         "DATABASE_URL is not set in backend/.env or environment variables."
     )
 
 config.set_main_option(
     "sqlalchemy.url",
-    normalize_database_url(settings.database_url).replace("%", "%%"),
+    normalize_database_url(database_url).replace("%", "%%"),
 )
 
 # Register Base.metadata for future model autogeneration

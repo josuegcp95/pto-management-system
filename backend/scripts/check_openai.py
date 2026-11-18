@@ -11,10 +11,11 @@ TEST_MODEL = "gpt-5.4-nano"
 
 def main() -> None:
     settings = get_settings()
-    if not settings.openai_api_key:
+    api_key = settings.openai_api_key.get_secret_value()
+    if not api_key:
         raise SystemExit("OPENAI_API_KEY is not set in backend/.env")
 
-    client = OpenAI(api_key=settings.openai_api_key)
+    client = OpenAI(api_key=api_key)
 
     # 1. Free check: can the key list models?
     model_ids = {m.id for m in client.models.list()}

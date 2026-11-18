@@ -15,6 +15,14 @@ CMSC 495 Capstone: AI-Assisted PTO Management System
 - **App:** https://pto-web.onrender.com
 - **API:** https://pto-api-m5lw.onrender.com ([API docs](https://pto-api-m5lw.onrender.com/docs))
 
+## Alpha Features
+
+- **Login with roles:** email/password login with JWT tokens. Employees and managers see different dashboards.
+- **Employee dashboard:** view your PTO balance (available, used, pending) and submit requests with an optional reason. Each request shows its dates, hours, status, policy notices, and the manager's comment.
+- **Rule engine:** invalid requests are rejected (past start date, end before start, no workdays, overlapping requests). Policy concerns are flagged for the manager: short notice (under 7 days), long requests (more than 10 workdays), and requests that exceed the available balance. Weekends and company holidays are not counted.
+- **Manager review:** managers see pending requests from their own team and approve or deny them with an optional comment. Approval is blocked if it would exceed the employee's balance.
+- **AI policy chatbot:** any logged-in user can ask questions about the PTO policy. Answers come only from `backend/app/policy/pto_policy.md`. Answers that need a human are marked for confirmation with a manager or HR.
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -78,7 +86,7 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 cp .env.example .env               # then fill in local values (see below), update DATABASE_URL
 alembic upgrade head
-python -m scripts.seed             # load demo manager, employees, balances, and sample requests
+python -m scripts.seed             # load demo accounts (see "Demo Accounts" below)
 uvicorn app.main:app --reload
 ```
 
@@ -100,7 +108,22 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open http://localhost:5173. The page should show **✅ Connected** when the backend is running.
+Open http://localhost:5173 and log in with one of the [demo accounts](#demo-accounts).
+
+To work on the frontend without the backend, set `VITE_USE_MOCK_API=true` in `frontend/.env.local`. Mock mode uses built-in sample data: any email and password logs in, and emails starting with `manager@` log in as a manager.
+
+### Backend Dependencies
+
+`backend/requirements.in` lists the direct dependencies. `backend/requirements.txt` is the lockfile generated from it, with every package pinned, so local machines, CI, and Render install the same versions.
+
+To add or upgrade a dependency, edit `requirements.in` (never `requirements.txt` directly), then from `backend/` with the venv active:
+
+```bash
+pip-compile requirements.in -o requirements.txt
+pip install -r requirements-dev.txt
+```
+
+Commit both files.
 
 ## Environment Variables
 
@@ -113,11 +136,17 @@ Open http://localhost:5173. The page should show **✅ Connected** when the back
 | `AI_PROVIDER` | `backend/.env` | `openai` or `mock` (fixed demo reply, no API calls) | `mock` if you don't have an OpenAI key |
 | `FRONTEND_ORIGIN` | `backend/.env` | Allowed origin for CORS | `http://localhost:5173` |
 | `VITE_API_URL` | `frontend/.env.local` | Backend URL | `http://localhost:8000` |
+| `VITE_USE_MOCK_API` | `frontend/.env.local` | `true` uses built-in mock data instead of the backend | `false` |
 
 - **Never commit `.env` or `.env.local` files.** Both are gitignored. Production values live only in Render.
 - **OpenAI keys:** you don't need one unless you're working on the AI feature. The rest of the app runs without it. If you do need one, ask the Integration Lead for your own dev key; keys are never shared between developers.
 
-#### Demo Accounts (loaded by `python -m scripts.seed`)
+## Demo Accounts
+
+Load or reset the demo accounts with the seed script. It is safe to run more than once: demo users and their requests are updated in place, and balances are recalculated.
+
+- **Locally:** from `backend/` with the venv active, after `alembic upgrade head`, run `python -m scripts.seed`.
+- **On Render:** open the `pto-api` service in the Render dashboard, go to the **Shell** tab, and run `python -m scripts.seed`.
 
 | Name | Email | Password | Role | Balance (Total / Used / Pending / Avail) |
 |---|---|---|---|---|
