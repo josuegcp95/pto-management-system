@@ -24,7 +24,7 @@ All employees of Global Campus Solutions receive PTO under this policy. PTO can 
 - Each employee receives **120 hours (15 workdays)** of PTO per calendar year.
 - The full allowance is granted on **January 1**. PTO is not earned per pay period.
 - **New hires** receive a prorated allowance of **10 hours for each full calendar month** remaining in the year after their start date. For example, an employee who starts on May 15 receives 70 hours (June through December).
-- Your balance cannot go below zero. You cannot request more hours than you have available.
+- Your balance cannot go below zero. You can submit a request for more hours than you have available, but it will be **flagged** for your manager. A request can only be approved if you have enough hours available at the time of approval.
 - Your available balance is checked when you submit a request and again when your manager reviews it, no matter when the time off takes place. Hours are deducted from your balance at the moment the request is approved. For example, a request submitted in December for dates in January uses whatever balance you have when your manager approves it.
 
 ## Section 3: How PTO Is Calculated

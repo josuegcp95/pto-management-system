@@ -4,6 +4,7 @@ import json
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import SecretStr
 
 from app.auth import get_current_user
 from app.chatbot import (
@@ -191,7 +192,7 @@ def test_non_json_reply_is_returned_but_marked_for_review():
 def test_missing_api_key_returns_503(monkeypatch):
     settings = get_settings()
     monkeypatch.setattr(settings, "ai_provider", "openai")
-    monkeypatch.setattr(settings, "openai_api_key", "")
+    monkeypatch.setattr(settings, "openai_api_key", SecretStr(""))
     app.dependency_overrides[get_current_user] = lambda: TEST_USER
 
     try:

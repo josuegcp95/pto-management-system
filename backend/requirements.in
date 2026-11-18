@@ -1,0 +1,12 @@
+fastapi[standard]==0.162.0
+pydantic-settings==2.16.1
+openai==3.41.0
+SQLAlchemy==2.1.8
+alembic==1.20.1
+psycopg[binary]==3.3.8
+PyJWT==2.10.1
+bcrypt==4.3.0
+
+# Not a direct dependency: listed only so the lockfile keeps its platform marker.
+# pip-compile drops markers on sub-dependencies, and uvloop does not install on Windows.
+uvloop; sys_platform != "win32"

@@ -311,12 +311,14 @@ def decide_request(
     """Approve or deny a pending PTO request (Week 3 spec, Section 3.5).
 
     Manager-only, restricted to assigned employees, and cannot be decided twice.
+    Approval is blocked if it would push used hours past the employee's total.
     """
     stmt = (
         select(PTORequest)
         .options(joinedload(PTORequest.employee))
         .where(PTORequest.request_id == request_id)
-        .with_for_update()
+        # Lock only the request row: PostgreSQL can't lock the outer-joined employee row.
+        .with_for_update(of=PTORequest)
     )
     pto_request = db.scalars(stmt).first()
     if pto_request is None:
@@ -345,6 +347,17 @@ def decide_request(
             "BALANCE_NOT_FOUND",
             "No PTO balance is set up for this employee.",
             status_code=404,
+        )
+
+    # Re-check the balance at approval time so used hours never exceed the total.
+    if (
+        body.decision == "approved"
+        and balance.used_hours + pto_request.hours > balance.total_hours
+    ):
+        raise AppError(
+            "INSUFFICIENT_BALANCE",
+            "Approving this request would exceed the employee's available PTO balance.",
+            status_code=409,
         )
 
     # Remove from pending; move to used only when approved.

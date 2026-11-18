@@ -398,6 +398,69 @@ def test_manager_denies_request_returns_pending_hours_to_available(
     assert balance.available_hours == 120
 
 
+@pytest.fixture()
+def over_balance_request(db_session: Session, org) -> PTORequest:
+    """Give Carol a pending 24h request she can't cover (only 8h left after used hours)."""
+    carol = org["carol"]
+    balance = db_session.get(PTOBalance, carol.employee_id)
+    balance.used_hours = 112
+    db_session.commit()
+    return org["req_carol_pending"]
+
+
+def test_approving_over_balance_request_returns_409_and_changes_nothing(
+    client_as, db_session: Session, org, over_balance_request
+):
+    alice = org["alice"]
+    carol = org["carol"]
+    req = over_balance_request
+
+    client = client_as(alice)
+    response = client.patch(
+        f"/api/v1/pto/requests/{req.request_id}/decision",
+        json={"decision": "approved", "manager_comment": "Approved."},
+    )
+    assert response.status_code == 409
+    error = response.json()["error"]
+    assert error["code"] == "INSUFFICIENT_BALANCE"
+    assert error["message"] == (
+        "Approving this request would exceed the employee's available PTO balance."
+    )
+
+    db_session.expire_all()
+    balance = db_session.get(PTOBalance, carol.employee_id)
+    assert balance.total_hours == 120
+    assert balance.used_hours == 112
+    assert balance.pending_hours == 24
+
+    unchanged_req = db_session.get(PTORequest, req.request_id)
+    assert unchanged_req.status == "pending"
+    assert unchanged_req.manager_comment is None
+    assert unchanged_req.reviewed_by is None
+    assert unchanged_req.reviewed_at is None
+
+
+def test_denying_over_balance_request_still_succeeds(
+    client_as, db_session: Session, org, over_balance_request
+):
+    alice = org["alice"]
+    carol = org["carol"]
+    req = over_balance_request
+
+    client = client_as(alice)
+    response = client.patch(
+        f"/api/v1/pto/requests/{req.request_id}/decision",
+        json={"decision": "denied", "manager_comment": "Not enough hours."},
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "denied"
+
+    db_session.expire_all()
+    balance = db_session.get(PTOBalance, carol.employee_id)
+    assert balance.used_hours == 112
+    assert balance.pending_hours == 0
+
+
 def test_employee_cannot_decide_request_returns_403(client_as, org):
     bob = org["bob"]
     req = org["req_bob_pending"]

@@ -52,7 +52,7 @@ let requests: PTORequest[] = [
     employee_name: "Jordan Lee",
     start_date: "2026-11-23",
     end_date: "2026-11-27",
-    hours: 40,
+    hours: 24,
     reason: "Thanksgiving holiday",
     status: "pending",
     flags: [
